@@ -35,16 +35,28 @@ function skipParagraph() {
 
 // 줄 출력: 한 줄씩 출력하며, 타이핑 애니메이션을 적용
 function displayLine() {
+    console.log("displayLine 호출됨");
+    console.log("currentDialogue:", currentDialogue);
+    console.log("currentParagraphIndex:", currentParagraphIndex);
+
+    console.log("logWindow 상태:", logWindow.innerHTML);
+
+    if (!currentDialogue || currentParagraphIndex >= currentDialogue.length) {
+        addLog("대화 데이터를 불러오지 못했습니다. 대화 파일을 확인하세요.");
+        return;
+    }
+
     const paragraph = currentDialogue[currentParagraphIndex];
-    if (currentLineIndex >= paragraph.lines.length) {
+    if (!paragraph || currentLineIndex >= paragraph.lines.length) {
         prepareForNextCommand(); // 단락 종료 후 명령 대기
         return;
     }
 
     const line = paragraph.lines[currentLineIndex];
-    isTyping = true;
+    console.log("출력할 줄:", line);
+
+    // `isTyping` 설정 제거
     addLogWithTyping(line, () => {
-        isTyping = false;
         isWaitingForEnter = true; // 줄 출력 후 엔터 대기
     });
 }
@@ -94,11 +106,27 @@ function disableInput() {
     submitButton.disabled = true;
 }
 
+// Function to add a log
+function addLog(message) {
+    const logEntry = document.createElement('div');
+    logEntry.textContent = message;
+    logWindow.appendChild(logEntry);
+    logWindow.scrollTop = logWindow.scrollHeight; // Scroll to the bottom
+}
+
 // Function to add a log with typing effect
 function addLogWithTyping(message, callback) {
-    if (isTyping) {
+    if (!message) {
+        console.error("addLogWithTyping: message가 비어 있습니다.");
         return;
     }
+
+    if (isTyping) {
+        console.warn("addLogWithTyping: 현재 타이핑 중입니다. 중복 호출 방지.");
+        return;
+    }
+
+    console.log("addLogWithTyping 호출됨:", message);
 
     isTyping = true;
     submitButton.disabled = true; // Disable the submit button during typing
@@ -112,10 +140,12 @@ function addLogWithTyping(message, callback) {
     function typeNextChar() {
         if (index < message.length) {
             logEntry.textContent += message[index];
+            console.log(`타이핑 중: ${logEntry.textContent}`);
             index++;
             setTimeout(typeNextChar, 50); // Adjust typing speed here (50ms per character)
         } else {
-            isTyping = false;
+            console.log("타이핑 완료:", logEntry.textContent);
+            isTyping = false; // 타이핑 완료
             submitButton.disabled = false; // Re-enable the submit button
             logWindow.scrollTop = logWindow.scrollHeight; // Scroll to the bottom
 
@@ -131,6 +161,7 @@ function addLogWithTyping(message, callback) {
 // Function to skip typing and immediately display all queued messages
 function skipTyping() {
     if (isTyping) {
+        console.log("skipTyping: 타이핑 스킵.");
         isTyping = false;
         submitButton.disabled = false;
 
@@ -144,6 +175,18 @@ function skipTyping() {
 // 초기화 및 첫 단락 출력
 window.addEventListener("DOMContentLoaded", () => {
     disableInput(); // 처음에는 입력창 비활성화
+
+    console.log("초기화 시작");
+    console.log("currentDialogue:", currentDialogue);
+
+    isTyping = false; // 초기화 시 타이핑 상태 초기화
+
+    if (!currentDialogue || currentDialogue.length === 0) {
+        addLog("대화 데이터를 불러오지 못했습니다. 대화 파일을 확인하세요.");
+        console.error("currentDialogue가 비어 있습니다. dialogue_town.js 파일을 확인하세요.");
+        return;
+    }
+
     displayLine(); // 첫 줄 출력
 });
 
@@ -164,6 +207,12 @@ submitButton.addEventListener("click", () => {
     const command = parseInt(inputText, 10);
 
     const paragraph = currentDialogue[currentParagraphIndex - 1]; // 이전 단락
+    if (!paragraph) {
+        addLog("현재 단락 데이터를 찾을 수 없습니다. 대화 파일을 확인하세요.");
+        console.error("paragraph가 undefined입니다. currentParagraphIndex:", currentParagraphIndex);
+        return;
+    }
+
     if (isCommandAllowed(command, paragraph.allowedCommands)) {
         disableInput(); // 입력창 비활성화
         displayLine(); // 다음 단락 시작

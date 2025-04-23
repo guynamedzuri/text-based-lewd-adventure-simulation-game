@@ -16,14 +16,12 @@
     width: 80%;
     height: 70vh; /* Set height to 70% of the viewport height */
     border: 2px solid #fff; /* White border */
-    overflow-y: auto;
+    overflow-y: auto; /* Ensure scrolling works */
     padding: 10px;
     display: flex;
     flex-direction: column; /* Logs stack from top to bottom */
     background-color: #000; /* Black background */
     color: #00ff00; /* Neon green font color */
-    font-family: 'Courier New', Courier, monospace;
-    margin-bottom: 20px; /* Add some space below the log window */
 }
 
 /* CSS for the input bar */

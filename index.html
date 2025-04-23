@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
+    <meta charset="UTF-8"> <!-- UTF-8 인코딩 설정 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 반응형 디자인 지원 -->
     <title>Text Adventure Game</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
     <div class="game-container">
         <div class="log-window" id="logWindow">
-            <!-- Log messages will be displayed here -->
         </div>
         <div class="input-bar">
             <input type="text" id="userInput" placeholder="Enter your command">
             <button id="submitButton">Submit</button>
         </div>
     </div>
-    <script src="dialogues/dialogue_town.js"></script> <!-- Updated path -->
+    <script src="dialogues/dialogue_town.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
