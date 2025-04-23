@@ -57,3 +57,27 @@
     border-color: #555; /* Dimmed border for disabled button */
     cursor: not-allowed;
 }
+
+/* 기본 폰트 설정 */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #000; /* Black background */
+    color: #00ff00; /* Neon green font color */
+    font-family: 'Courier New', Courier, monospace; /* Default font for English */
+}
+
+/* 한국어(Korean) 폰트 설정 */
+body:lang(ko) {
+    font-family: 'Nanum Gothic', 'Courier New', Courier, monospace; /* Nanum Gothic for Korean */
+}
+
+/* 일본어(Japanese) 폰트 설정 */
+body:lang(ja) {
+    font-family: 'Noto Sans JP', 'Courier New', Courier, monospace; /* Noto Sans JP for Japanese */
+}
+
+/* 영어(English) 폰트 설정 */
+body:lang(en) {
+    font-family: 'Courier New', Courier, monospace; /* Default font for English */
+}

@@ -6,6 +6,17 @@ const submitButton = document.getElementById('submitButton');
 let isTyping = false; // Flag to track if typing animation is in progress
 let typingQueue = []; // Queue to store messages during typing
 
+const commandMap = {
+    1: "말을 건다.",
+    2: "이동한다.",
+    999: "그만둔다."
+};
+
+// 허용된 명령어를 확인하는 함수
+function isCommandAllowed(command, allowedCommands) {
+    return allowedCommands.includes(command);
+}
+
 // Function to add a log with typing effect
 function addLogWithTyping(message) {
     if (isTyping) {
