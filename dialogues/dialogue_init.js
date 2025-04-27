@@ -1,4 +1,4 @@
-const dialogueTown = [
+const tutorial = [
     {
         lines: [
             "당신은 마을에 도착했습니다.",

@@ -8,14 +8,23 @@
 </head>
 <body>
     <div class="game-container">
-        <div class="log-window" id="logWindow">
+        <div class="character-container">
+            <img id="characterImage" src="chara/wolf_normal.png" alt="캐릭터 이미지">
         </div>
-        <div class="input-bar">
-            <input type="text" id="userInput" placeholder="Enter your command">
-            <button id="submitButton">Submit</button>
+        <div class="center-container">
+            <div class="log-window" id="logWindow"></div>
+            <div class="input-bar">
+                <input type="text" id="userInput" placeholder="명령어를 입력하세요.">
+                <button id="submitButton">Submit</button>
+            </div>
+        </div>
+        <div class="background-container">
+            <img id="backgroundImage" src="map/1.png" alt="배경 이미지">
         </div>
     </div>
-    <script src="dialogues/dialogue_town.js"></script>
+    <script src="dialogues/dialogue_init.js"></script>
+    <script src="chara.js"></script>
+    <script src="map.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

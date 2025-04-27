@@ -3,16 +3,40 @@ const logWindow = document.getElementById('logWindow');
 const userInput = document.getElementById('userInput');
 const submitButton = document.getElementById('submitButton');
 
+// 캐릭터 및 배경 이미지 요소
+const characterImage = document.getElementById('characterImage');
+const backgroundImage = document.getElementById('backgroundImage');
+
+// 이미지 업데이트 함수
+function updateImage(imageElement, newSrc) {
+    // 페이드아웃
+    imageElement.style.opacity = 0;
+
+    // 이미지 소스 업데이트 및 페이드인
+    setTimeout(() => {
+        imageElement.src = newSrc; // 새로운 이미지 소스 설정
+        imageElement.onload = () => {
+            imageElement.style.opacity = 1; // 페이드인
+        };
+    }, 500); // CSS transition 시간(0.5초)과 동일하게 설정
+}
+
+// 테스트: 캐릭터와 배경 이미지 업데이트
+function testImageUpdate() {
+    updateImage(characterImage, 'chara/wolf_normal.png'); // 캐릭터 이미지 업데이트
+    updateImage(backgroundImage, 'map/1.png'); // 배경 이미지 업데이트
+}
+
 let currentParagraphIndex = 0; // 현재 단락 인덱스
 let currentLineIndex = 0; // 현재 줄 인덱스
 let isTyping = false; // 타이핑 애니메이션 진행 여부
 let isWaitingForEnter = false; // 엔터 입력 대기 상태
-let currentDialogue = dialogueTown; // 현재 대사집
+let currentDialogue = tutorial;
 
 const commandMap = {
-    1: "말을 건다.",
-    2: "이동한다.",
-    999: "그만둔다."
+    1: "말을 건다",
+    2: "이동한다",
+    999: "그만둔다"
 };
 
 // 허용된 명령어를 확인하는 함수
@@ -90,8 +114,8 @@ function prepareForNextCommand() {
 
 // 허용된 명령어 출력
 function displayAllowedCommands(commands) {
-    const commandDescriptions = commands.map(cmd => `${cmd}: ${commandMap[cmd]}`).join(", ");
-    addLog(`허용된 명령어: ${commandDescriptions}`);
+    const commandDescriptions = commands.map(cmd => `${cmd}. ${commandMap[cmd]}`).join(" ");
+    addLog(`${commandDescriptions}`);
 }
 
 // 입력창 활성화
@@ -138,6 +162,24 @@ function addLogWithTyping(message, callback) {
     let index = 0;
 
     function typeNextChar() {
+        // 타이핑 중 `isTyping`이 false로 변경되었는지 확인
+        if (!isTyping) {
+            console.log("타이핑 중단 감지: 남은 문장을 한 번에 출력합니다.");
+            logEntry.textContent += message.slice(index); // 남은 문장 출력
+            console.log("타이핑 완료:", logEntry.textContent);
+
+            // 타이핑 완료 처리
+            isTyping = false;
+            submitButton.disabled = false; // Re-enable the submit button
+            logWindow.scrollTop = logWindow.scrollHeight; // Scroll to the bottom
+
+            if (callback) {
+                callback();
+            }
+            return;
+        }
+
+        // 타이핑 애니메이션 진행
         if (index < message.length) {
             logEntry.textContent += message[index];
             console.log(`타이핑 중: ${logEntry.textContent}`);
@@ -166,7 +208,6 @@ function skipTyping() {
         submitButton.disabled = false;
 
         const logEntry = document.createElement('div');
-        logEntry.textContent = "타이핑이 스킵되었습니다.";
         logWindow.appendChild(logEntry);
         logWindow.scrollTop = logWindow.scrollHeight; // Scroll to the bottom
     }
@@ -174,6 +215,8 @@ function skipTyping() {
 
 // 초기화 및 첫 단락 출력
 window.addEventListener("DOMContentLoaded", () => {
+    console.log("대화 스크립트 로드 시작");
+
     disableInput(); // 처음에는 입력창 비활성화
 
     console.log("초기화 시작");
@@ -183,11 +226,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (!currentDialogue || currentDialogue.length === 0) {
         addLog("대화 데이터를 불러오지 못했습니다. 대화 파일을 확인하세요.");
-        console.error("currentDialogue가 비어 있습니다. dialogue_town.js 파일을 확인하세요.");
+        console.error("currentDialogue가 비어 있습니다. 파일을 확인하세요.");
         return;
     }
 
     displayLine(); // 첫 줄 출력
+
+    testImageUpdate(); // 캐릭터와 배경 이미지 업데이트
 });
 
 // 엔터 키 이벤트 처리

@@ -1,21 +1,53 @@
-/* CSS for the game container */
+/* 게임 컨테이너 */
 .game-container {
-    width: 100%;
-    height: 100%;
+    width: 80%; /* 전체 창 너비의 80% */
+    height: calc(70vh + 40px); /* 로그창 높이 + 입력창 높이 */
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row; /* 가로로 배치 */
     justify-content: center;
+    align-items: center;
+    position: absolute; /* 화면 중앙 배치를 위해 절대 위치 사용 */
+    top: 50%; /* 수직 중앙 */
+    left: 50%; /* 수평 중앙 */
+    transform: translate(-50%, -50%); /* 중앙 정렬 */
     background-color: #000; /* Black background */
     color: #00ff00; /* Neon green font color */
     font-family: 'Courier New', Courier, monospace; /* Matrix-style font */
+    gap: 2.5%
 }
 
-/* CSS for the log window */
-.log-window {
-    width: 80%;
-    height: 70vh; /* Set height to 70% of the viewport height */
+/* 캐릭터 그림 컨테이너 */
+.character-container {
+    width: 15%; /* 너비는 높이에 비례 */
+    height: 100%; /* game-container 높이에 맞춤 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* 캐릭터 이미지 */
+.character-container img {
+    height: 100%; /* 컨테이너 높이에 맞춤 */
+    object-fit: contain; /* 비율 유지하며 컨테이너에 맞춤 */
+    opacity: 1; /* 기본 상태에서 완전히 보이도록 설정 */
+    transition: opacity 0.5s ease-in-out; /* 크로스페이드 애니메이션 */
+}
+
+/* 로그창과 입력창을 묶는 컨테이너 */
+.center-container {
+    flex-grow: 1;
+    height: 100%; /* game-container 높이에 맞춤 */
+    display: flex;
+    flex-direction: column; /* 세로로 배치 */
+    justify-content: space-between;
+    background-color: #000; /* Black background */
     border: 2px solid #fff; /* White border */
+}
+
+/* 로그창 */
+.log-window {
+    flex: 1; /* 남은 공간을 모두 차지 */
     overflow-y: auto; /* Ensure scrolling works */
     padding: 10px;
     display: flex;
@@ -24,11 +56,9 @@
     color: #00ff00; /* Neon green font color */
 }
 
-/* CSS for the input bar */
+/* 입력창 */
 .input-bar {
-    width: 80%;
     height: 40px;
-    margin-top: 10px;
     display: flex;
 }
 
@@ -54,6 +84,26 @@
     color: #555; /* Dimmed green for disabled button */
     border-color: #555; /* Dimmed border for disabled button */
     cursor: not-allowed;
+}
+
+/* 배경 그림 컨테이너 */
+.background-container {
+    width: 15%; /* 너비는 높이에 비례 */
+    height: 100%; /* game-container 높이에 맞춤 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 50px; /* 꼭지점을 둥글게 */
+    box-sizing: border-box; /* 패딩이 컨테이너 크기에 포함되도록 설정 */
+}
+
+/* 배경 이미지 */
+.background-container img {
+    height: 100%; /* 컨테이너 높이에 맞춤 */
+    object-fit: contain; /* 비율 유지하며 컨테이너에 맞춤 */
+    opacity: 1; /* 기본 상태에서 완전히 보이도록 설정 */
+    transition: opacity 0.5s ease-in-out; /* 크로스페이드 애니메이션 */
 }
 
 /* 기본 폰트 설정 */
