@@ -63,8 +63,6 @@ function displayLine() {
     console.log("currentDialogue:", currentDialogue);
     console.log("currentParagraphIndex:", currentParagraphIndex);
 
-    console.log("logWindow 상태:", logWindow.innerHTML);
-
     if (!currentDialogue || currentParagraphIndex >= currentDialogue.length) {
         addLog("대화 데이터를 불러오지 못했습니다. 대화 파일을 확인하세요.");
         return;
@@ -79,16 +77,35 @@ function displayLine() {
     const line = paragraph.lines[currentLineIndex];
     console.log("출력할 줄:", line);
 
-    // `isTyping` 설정 제거
     addLogWithTyping(line, () => {
         isWaitingForEnter = true; // 줄 출력 후 엔터 대기
+        addBlinkingArrow(); // 역삼각형 애니메이션 추가
     });
+}
+
+// 역삼각형 애니메이션 추가
+function addBlinkingArrow() {
+    const logEntries = logWindow.querySelectorAll('div');
+    const lastLogEntry = logEntries[logEntries.length - 1]; // 가장 최근 로그
+    if (lastLogEntry) {
+        const arrow = document.createElement('span');
+        arrow.classList.add('blinking-arrow');
+        arrow.textContent = '▼'; // 역삼각형 모양
+        lastLogEntry.appendChild(arrow);
+    }
+}
+
+// 역삼각형 애니메이션 제거
+function removeBlinkingArrow() {
+    const arrows = logWindow.querySelectorAll('.blinking-arrow');
+    arrows.forEach(arrow => arrow.remove());
 }
 
 // 다음 줄로 이동
 function nextLine() {
     if (isWaitingForEnter) {
         isWaitingForEnter = false;
+        removeBlinkingArrow(); // 애니메이션 제거
         currentLineIndex++;
         displayLine();
     }
@@ -238,7 +255,10 @@ window.addEventListener("DOMContentLoaded", () => {
 // 엔터 키 이벤트 처리
 document.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
-        if (isTyping) {
+        if (document.activeElement === userInput) {
+            // 입력창에 포커스가 있을 경우 submit 버튼 클릭 이벤트 트리거
+            submitButton.click();
+        } else if (isTyping) {
             skipTyping(); // 현재 줄 타이핑 스킵
         } else if (isWaitingForEnter) {
             nextLine(); // 다음 줄 출력
