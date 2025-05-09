@@ -34,9 +34,9 @@ let isWaitingForEnter = false; // 엔터 입력 대기 상태
 let currentDialogue = tutorial;
 
 const commandMap = {
-    1: "말을 건다",
-    2: "이동한다",
-    999: "그만둔다"
+    1: { text: "말을 건다", destination: { dialogue: "tutorial", label: "talkToVillager" } },
+    2: { text: "이동한다", destination: { dialogue: "tutorial", label: "firstLine" } },
+    999: { text: "그만둔다", action: () => console.log("게임 종료") }
 };
 
 // 허용된 명령어를 확인하는 함수
@@ -57,6 +57,11 @@ function skipParagraph() {
     }
 }
 
+// 로그창을 지우는 함수
+function clearLogWindow() {
+    logWindow.innerHTML = ""; // 로그창 내용 초기화
+}
+
 // 줄 출력: 한 줄씩 출력하며, 타이핑 애니메이션을 적용
 function displayLine() {
     console.log("displayLine 호출됨");
@@ -69,15 +74,21 @@ function displayLine() {
     }
 
     const paragraph = currentDialogue[currentParagraphIndex];
-    if (!paragraph || currentLineIndex >= paragraph.lines.length) {
+    if (!paragraph || currentLineIndex >= paragraph.steps.length) {
         prepareForNextCommand(); // 단락 종료 후 명령 대기
         return;
     }
 
-    const line = paragraph.lines[currentLineIndex];
-    console.log("출력할 줄:", line);
+    const step = paragraph.steps[currentLineIndex];
+    console.log("출력할 줄:", step.text);
 
-    addLogWithTyping(line, () => {
+    // 액션 실행
+    if (step.action) {
+        step.action();
+    }
+
+    // 텍스트 출력
+    addLogWithTyping(step.text, () => {
         isWaitingForEnter = true; // 줄 출력 후 엔터 대기
         addBlinkingArrow(); // 역삼각형 애니메이션 추가
     });
@@ -114,24 +125,31 @@ function nextLine() {
 // 명령 대기 상태 준비
 function prepareForNextCommand() {
     const paragraph = currentDialogue[currentParagraphIndex];
-    if (currentLineIndex >= paragraph.lines.length) {
-        currentLineIndex = 0; // 줄 인덱스 초기화
-        currentParagraphIndex++; // 다음 단락으로 이동
 
-        if (currentParagraphIndex >= currentDialogue.length) {
-            addLog("더 이상 진행할 대사가 없습니다.");
+    if (currentLineIndex >= paragraph.steps.length) {
+        currentLineIndex = 0; // 줄 인덱스 초기화
+
+        // `destination`이 있으면 다음 대화로 이동
+        if (paragraph.destination) {
+            nextDialogue(paragraph.destination);
             return;
         }
 
-        const allowedCommands = paragraph.allowedCommands;
-        displayAllowedCommands(allowedCommands); // 허용된 명령어 출력
+        // `allowedCommands`가 비어 있으면 오류 처리
+        if (!paragraph.allowedCommands || paragraph.allowedCommands.length === 0) {
+            console.error("허용된 명령어 또는 destination이 없습니다.");
+            return;
+        }
+
+        // 허용된 명령어 출력
+        displayAllowedCommands(paragraph.allowedCommands);
         enableInput(); // 입력창 활성화
     }
 }
 
 // 허용된 명령어 출력
 function displayAllowedCommands(commands) {
-    const commandDescriptions = commands.map(cmd => `${cmd}. ${commandMap[cmd]}`).join(" ");
+    const commandDescriptions = commands.map(cmd => `${cmd}. ${commandMap[cmd].text}`).join(" ");
     addLog(`${commandDescriptions}`);
 }
 
@@ -230,6 +248,33 @@ function skipTyping() {
     }
 }
 
+// 다음 대화로 이동
+function nextDialogue(destination) {
+    const { dialogue, label } = destination;
+
+    // 대화 데이터 로드
+    const newDialogue = dialogue; // 전달된 dialogue 값을 직접 사용
+    if (!newDialogue) {
+        console.error(`대화 데이터 ${dialogue}를 찾을 수 없습니다.`);
+        return;
+    }
+
+    // 라벨로 인덱스 찾기
+    const newParagraphIndex = newDialogue.findIndex(paragraph => paragraph.label === label);
+    if (newParagraphIndex === -1) {
+        console.error(`라벨 ${label}에 해당하는 단락을 찾을 수 없습니다.`);
+        return;
+    }
+
+    // 대화 상태 업데이트
+    currentDialogue = newDialogue;
+    currentParagraphIndex = newParagraphIndex;
+    currentLineIndex = 0;
+
+    // 새로운 대화 시작
+    displayLine();
+}
+
 // 초기화 및 첫 단락 출력
 window.addEventListener("DOMContentLoaded", () => {
     console.log("대화 스크립트 로드 시작");
@@ -271,18 +316,27 @@ submitButton.addEventListener("click", () => {
     const inputText = userInput.value.trim();
     const command = parseInt(inputText, 10);
 
-    const paragraph = currentDialogue[currentParagraphIndex - 1]; // 이전 단락
+    const paragraph = currentDialogue[currentParagraphIndex];
     if (!paragraph) {
         addLog("현재 단락 데이터를 찾을 수 없습니다. 대화 파일을 확인하세요.");
-        console.error("paragraph가 undefined입니다. currentParagraphIndex:", currentParagraphIndex);
         return;
     }
 
-    if (isCommandAllowed(command, paragraph.allowedCommands)) {
-        disableInput(); // 입력창 비활성화
-        displayLine(); // 다음 단락 시작
-    } else {
-        addLog("허용되지 않은 명령어입니다. 다시 입력하세요.");
+    const commandData = commandMap[command];
+    if (!commandData) {
+        addLog("잘못된 명령어입니다. 다시 입력하세요.");
+        return;
+    }
+
+    // 명령어에 `action`이 있으면 실행
+    if (commandData.action) {
+        commandData.action();
+    }
+
+    // 명령어에 `destination`이 있으면 이동
+    if (commandData.destination) {
+        disableInput();
+        nextDialogue(commandData.destination);
     }
 
     userInput.value = ""; // 입력 필드 초기화
