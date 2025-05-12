@@ -15,6 +15,7 @@ let currentLineIndex = 0; // 현재 줄 인덱스
 let isTyping = false; // 타이핑 애니메이션 진행 여부
 let isWaitingForEnter = false; // 엔터 입력 대기 상태
 let currentDialogue = tutorial;
+let currentMap = 1; // 현재 맵 ID
 
 // 명령어 매핑
 const commandMap = {
@@ -61,7 +62,7 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
-// 명령어 입력 처리
+// submit 버튼 클릭 처리
 submitButton.addEventListener("click", () => {
     // 줄넘김을 기다리는 상태일 경우
     if (isWaitingForEnter) {
@@ -70,6 +71,12 @@ submitButton.addEventListener("click", () => {
     }
 
     const inputText = userInput.value.trim();
+
+    // 입력 필드가 비어 있으면 아무 작업도 하지 않고 종료
+    if (!inputText) {
+        return;
+    }
+
     const command = parseInt(inputText, 10);
 
     const paragraph = currentDialogue[currentParagraphIndex];
@@ -81,6 +88,7 @@ submitButton.addEventListener("click", () => {
     const commandData = commandMap[command];
     if (!commandData) {
         addLog("잘못된 명령어입니다. 다시 입력하세요.");
+        userInput.value = ""; // 입력 필드 초기화
         return;
     }
 
