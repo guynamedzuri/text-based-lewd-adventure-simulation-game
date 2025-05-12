@@ -45,14 +45,17 @@ function parseDialogueFile(filePath) {
                 const comment = actionPart.slice(actionKey.length).trim(); // 나머지 부분
 
                 if (actionPresets[actionKey]) {
-                    step.action = actionPresets[actionKey](comment);
+                    step.action = eval(actionPresets[actionKey](comment)); // 문자열 대신 함수로 변환
                 } else if (comment.startsWith('//')) {
                     step.action = null;
                     step.comment = comment; // 주석 처리
                 }
             }
 
-            currentObject.steps.push(step);
+            // "1 2" 또는 "tutorial firstLine" 같은 항목은 steps에 추가하지 않음
+            if (!/^\d+(\s+\d+)*$/.test(step.text) && !/^[a-zA-Z]+\s+[a-zA-Z]+$/.test(step.text)) {
+                currentObject.steps.push(step);
+            }
         }
     });
 
@@ -60,7 +63,25 @@ function parseDialogueFile(filePath) {
         dialogueArray.push(currentObject); // 마지막 객체 저장
     }
 
-    return `window.${dialogueName} = ${JSON.stringify(dialogueArray, null, 4)};`;
+    return `window.${dialogueName} = ${formatAsJavaScriptObject(dialogueArray)};`;
+}
+
+// JavaScript 객체 형식으로 문자열 생성 함수
+function formatAsJavaScriptObject(obj, indent = 4, level = 0) {
+    const indentation = ' '.repeat(level * indent);
+
+    if (Array.isArray(obj)) {
+        const items = obj.map(item => formatAsJavaScriptObject(item, indent, level + 1));
+        return `[\n${indentation + ' '.repeat(indent)}${items.join(`,\n${indentation + ' '.repeat(indent)}`)}\n${indentation}]`;
+    } else if (typeof obj === 'object' && obj !== null) {
+        const entries = Object.entries(obj)
+            .map(([key, value]) => `${key}: ${formatAsJavaScriptObject(value, indent, level + 1)}`);
+        return `{\n${indentation + ' '.repeat(indent)}${entries.join(`,\n${indentation + ' '.repeat(indent)}`)}\n${indentation}}`;
+    } else if (typeof obj === 'string') {
+        return `"${obj}"`;
+    } else {
+        return obj;
+    }
 }
 
 // 모든 txt 파일 파싱 및 합치기
