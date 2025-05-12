@@ -11,7 +11,7 @@ window.tutorial = [
         label: "talkToVillager",
         steps: [
             { text: "마을 주민에게 말을 걸었습니다.", action: null },
-            { text: "주민은 당신을 반갑게 맞이합니다.", action: () => updateImage(characterImage, 'chara/villager_happy.png') }
+            { text: "주민은 당신을 반갑게 맞이합니다.", action: () => updateImage(characterImage, 'chara/wolf_smile.png') }
         ],
         destination: { dialogue: "tutorial", label: "firstLine" }, // 다음 대화로 이동
     }
