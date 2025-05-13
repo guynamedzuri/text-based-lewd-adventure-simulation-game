@@ -8,3 +8,16 @@
 주민은 당신을 반갑게 맞이합니다./chara wolf_smile.png
 -d
 tutorial firstLine
+*friendlyVillager
+마을 주민이 당신에게 말을 겁니다.
+-f
+if (charaInfo[1].love > 10) {
+    charaInfo[1].love += 5;
+    return { dialogue: "tutorial", label: "talkToVillager" };
+} else if (charaInfo[1].love > 5) {
+    charaInfo[1].love += 2;
+    return { dialogue: "tutorial", label: "neutralResponse" };
+} else {
+    charaInfo[1].love++;
+    return { dialogue: "tutorial", label: "coldResponse" };
+}

@@ -15,7 +15,13 @@ function parseDialogueFile(filePath) {
     const dialogueArray = [];
     let currentObject = null;
 
+    let skipToIndex = -1; // 특정 블록 처리 후 건너뛸 인덱스
+
     lines.forEach((line, index) => {
+        if (index <= skipToIndex) {
+            return; // 이미 처리된 블록은 건너뜀
+        }
+
         if (line.startsWith('*')) {
             // 새로운 label 시작
             if (currentObject) {
@@ -27,13 +33,26 @@ function parseDialogueFile(filePath) {
             };
         } else if (line.startsWith('-')) {
             // steps 종료 및 allowedCommands 또는 destination 설정
-            const type = line[1]; // 'a' 또는 'd'
-            const value = lines[index + 1]; // 다음 줄 값
+            const type = line[1]; // 'a', 'd', 또는 'f'
             if (type === 'a') {
+                const value = lines[index + 1]; // 다음 줄 값
                 currentObject.allowedCommands = value.split(' ').map(Number);
+                skipToIndex = index + 1; // 다음 줄까지 처리했으므로 건너뜀
             } else if (type === 'd') {
+                const value = lines[index + 1]; // 다음 줄 값
                 const [dialogue, label] = value.split(' ');
                 currentObject.destination = { dialogue, label };
+                skipToIndex = index + 1; // 다음 줄까지 처리했으므로 건너뜀
+            } else if (type === 'f') {
+                // 함수형 destination 처리
+                const functionLines = [];
+                let i = index + 1;
+                while (i < lines.length && !lines[i].startsWith('-') && !lines[i].startsWith('*')) {
+                    functionLines.push(lines[i]);
+                    i++;
+                }
+                currentObject.destination = parseFunctionDestination(functionLines);
+                skipToIndex = i - 1; // -f 블록을 처리한 이후로 인덱스 이동
             }
         } else {
             // steps 처리
@@ -52,10 +71,12 @@ function parseDialogueFile(filePath) {
                 }
             }
 
-            // "1 2" 또는 "tutorial firstLine" 같은 항목은 steps에 추가하지 않음
-            if (!/^\d+(\s+\d+)*$/.test(step.text) && !/^[a-zA-Z]+\s+[a-zA-Z]+$/.test(step.text)) {
-                currentObject.steps.push(step);
+            // steps에 추가할 수 없는 경우를 명확히 정의
+            if (line.startsWith('-') || line.startsWith('*') || currentObject.destination) {
+                return; // -a, -d, -f 또는 destination 관련 데이터는 steps에 추가하지 않음
             }
+
+            currentObject.steps.push(step);
         }
     });
 
@@ -64,6 +85,12 @@ function parseDialogueFile(filePath) {
     }
 
     return `window.${dialogueName} = ${formatAsJavaScriptObject(dialogueArray)};`;
+}
+
+// 함수형 destination을 처리하는 함수
+function parseFunctionDestination(lines) {
+    const functionBody = lines.join('\n'); // 함수 본문 생성
+    return new Function(functionBody); // 동적으로 함수 생성
 }
 
 // JavaScript 객체 형식으로 문자열 생성 함수

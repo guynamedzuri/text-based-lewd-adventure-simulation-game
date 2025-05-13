@@ -32,5 +32,26 @@ window.tutorial = [
             dialogue: "tutorial",
             label: "firstLine"
         }
+    },
+    {
+        label: "friendlyVillager",
+        steps: [
+            {
+                text: "마을 주민이 당신에게 말을 겁니다.",
+                action: null
+            }
+        ],
+        destination: function anonymous() {
+if (charaInfo[1].love > 10) {
+charaInfo[1].love += 5;
+return { dialogue: "tutorial", label: "talkToVillager" };
+} else if (charaInfo[1].love > 5) {
+charaInfo[1].love += 2;
+return { dialogue: "tutorial", label: "neutralResponse" };
+} else {
+charaInfo[1].love++;
+return { dialogue: "tutorial", label: "coldResponse" };
+}
+}
     }
 ];

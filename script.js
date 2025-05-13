@@ -100,7 +100,7 @@ submitButton.addEventListener("click", () => {
     // 명령어에 `destination`이 있으면 이동
     if (commandData.destination) {
         disableInput();
-        nextDialogue(commandData.destination);
+        nextDialogue(destination); // `destination`이 함수인지 확인 및 실행은 nextDialogue에서 처리
     }
 
     userInput.value = ""; // 입력 필드 초기화
@@ -133,6 +133,11 @@ function displayLine() {
 
 // 다음 대화로 이동
 function nextDialogue(destination) {
+    // destination이 함수라면 실행하여 반환값 사용
+    if (typeof destination === "function") {
+        destination = destination();
+    }
+
     const { dialogue, label } = destination;
 
     // 대화 데이터 로드
