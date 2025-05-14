@@ -85,22 +85,44 @@ submitButton.addEventListener("click", () => {
         return;
     }
 
-    const commandData = commandMap[command];
-    if (!commandData) {
-        addLog("잘못된 명령어입니다. 다시 입력하세요.");
-        userInput.value = ""; // 입력 필드 초기화
-        return;
-    }
+    // `allowedCommands` 처리
+    if (paragraph.allowedCommands) {
+        const commandData = commandMap[command];
+        if (!commandData) {
+            addLog("잘못된 명령어입니다. 다시 입력하세요.");
+            userInput.value = ""; // 입력 필드 초기화
+            return;
+        }
 
-    // 명령어에 `action`이 있으면 실행
-    if (commandData.action) {
-        commandData.action();
-    }
+        // 명령어에 `action`이 있으면 실행
+        if (commandData.action) {
+            commandData.action();
+        }
 
-    // 명령어에 `destination`이 있으면 이동
-    if (commandData.destination) {
-        disableInput();
-        nextDialogue(destination); // `destination`이 함수인지 확인 및 실행은 nextDialogue에서 처리
+        // 명령어에 `destination`이 있으면 이동
+        if (commandData.destination) {
+            disableInput();
+            nextDialogue(commandData.destination); // `destination`이 함수인지 확인 및 실행은 nextDialogue에서 처리
+        }
+    } else if (paragraph.customCommands) {
+        // `customCommands` 처리
+        const customCommand = paragraph.customCommands[command - 1]; // 인덱스는 0부터 시작하므로 -1
+        if (!customCommand) {
+            addLog("잘못된 명령어입니다. 다시 입력하세요.");
+            userInput.value = ""; // 입력 필드 초기화
+            return;
+        }
+
+        // 명령어에 `action`이 있으면 실행
+        if (customCommand.action) {
+            customCommand.action();
+        }
+
+        // 명령어에 `destination`이 있으면 이동
+        if (customCommand.destination) {
+            disableInput();
+            nextDialogue(customCommand.destination); // `destination`이 함수인지 확인 및 실행은 nextDialogue에서 처리
+        }
     }
 
     userInput.value = ""; // 입력 필드 초기화
@@ -186,14 +208,20 @@ function prepareForNextCommand() {
             return;
         }
 
-        // `allowedCommands`가 비어 있으면 오류 처리
-        if (!paragraph.allowedCommands || paragraph.allowedCommands.length === 0) {
-            console.error("허용된 명령어 또는 destination이 없습니다.");
+        // `allowedCommands`와 `customCommands`가 모두 없는 경우 오류 처리
+        if (!paragraph.allowedCommands && !paragraph.customCommands) {
+            console.error("허용된 명령어 또는 customCommands가 없습니다.");
             return;
         }
 
-        // 허용된 명령어 출력
-        displayAllowedCommands(paragraph.allowedCommands);
+        // `allowedCommands`가 있으면 displayAllowedCommands 실행
+        if (paragraph.allowedCommands) {
+            displayAllowedCommands(paragraph.allowedCommands);
+        } else {
+            // `customCommands`가 있으면 displayCustomCommands 실행
+            displayCustomCommands(paragraph.customCommands);
+        }
+
         enableInput(); // 입력창 활성화
     }
 }
@@ -279,6 +307,14 @@ function skipTyping() {
 // 허용된 명령어 출력
 function displayAllowedCommands(commands) {
     const commandDescriptions = commands.map(cmd => `${cmd}. ${commandMap[cmd].text}`).join(" ");
+    addLog(`${commandDescriptions}`);
+}
+
+// 사용자 정의 명령어 출력
+function displayCustomCommands(commands) {
+    const commandDescriptions = commands
+        .map((cmd, index) => `${index + 1}. ${cmd.text}`)
+        .join(" ");
     addLog(`${commandDescriptions}`);
 }
 
