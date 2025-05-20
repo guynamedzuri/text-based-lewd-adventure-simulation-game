@@ -32,8 +32,8 @@ function parseDialogueFile(filePath) {
                 steps: [],
             };
         } else if (line.startsWith('-')) {
-            // steps 종료 및 allowedCommands 또는 destination 설정
-            const type = line[1]; // 'a', 'd', 또는 'f'
+            // steps 종료 및 allowedCommands, destination, 또는 customCommands 설정
+            const type = line[1]; // 'a', 'd', 'f', 또는 'c'
             if (type === 'a') {
                 const value = lines[index + 1]; // 다음 줄 값
                 currentObject.allowedCommands = value.split(' ').map(Number);
@@ -53,9 +53,46 @@ function parseDialogueFile(filePath) {
                 }
                 currentObject.destination = parseFunctionDestination(functionLines);
                 skipToIndex = i - 1; // -f 블록을 처리한 이후로 인덱스 이동
+            } else if (type === 'c') {
+                // customCommands 처리
+                const customCommands = [];
+                let i = index + 1;
+                let commandBuffer = [];
+                let openBraces = 0;
+
+                while (i < lines.length && !lines[i].startsWith('-') && !lines[i].startsWith('*')) {
+                    const line = lines[i];
+                    commandBuffer.push(line);
+
+                    // 중괄호 개수 추적
+                    openBraces += (line.match(/{/g) || []).length;
+                    openBraces -= (line.match(/}/g) || []).length;
+
+                    // 중괄호가 닫히면 하나의 customCommand 완성
+                    if (openBraces === 0 && commandBuffer.length > 0) {
+                        const commandText = commandBuffer.join(' ').trim();
+                        const [textPart, destinationPart] = commandText.split(',').map(part => part.trim());
+
+                        // text와 destination 파싱
+                        const text = textPart.replace(/^"|"$/g, ''); // 양쪽 따옴표 제거
+                        const destination = eval(`(${destinationPart})`); // destination을 객체로 변환
+
+                        customCommands.push({ text, destination });
+                        commandBuffer = []; // 버퍼 초기화
+                    }
+
+                    i++;
+                }
+
+                currentObject.customCommands = customCommands;
+                skipToIndex = i - 1; // -c 블록을 처리한 이후로 인덱스 이동
             }
         } else {
             // steps 처리
+            if (line.startsWith('-') || line.startsWith('*')) {
+                return; // -a, -d, -f, -c 또는 새로운 label은 steps에 추가하지 않음
+            }
+
             const [text, actionPart] = line.split('/');
             const step = { text: text.trim(), action: null };
 
@@ -69,11 +106,6 @@ function parseDialogueFile(filePath) {
                     step.action = null;
                     step.comment = comment; // 주석 처리
                 }
-            }
-
-            // steps에 추가할 수 없는 경우를 명확히 정의
-            if (line.startsWith('-') || line.startsWith('*') || currentObject.destination) {
-                return; // -a, -d, -f 또는 destination 관련 데이터는 steps에 추가하지 않음
             }
 
             currentObject.steps.push(step);
