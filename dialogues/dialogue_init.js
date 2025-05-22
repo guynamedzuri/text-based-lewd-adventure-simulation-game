@@ -25,7 +25,6 @@ window.start = [{
                     logWindow.appendChild(img);
                     logWindow.scrollTop = logWindow.scrollHeight; // 스크롤을 맨 아래로 이동
                 }
-                nextLine(); // 다음 줄로 이동
                 return;
             }
         }],
@@ -84,7 +83,6 @@ window.start = [{
                 text: "",
                 action: () => {
                     clearLogWindow();
-                    nextLine();
                     return;
                 }
             },

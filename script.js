@@ -254,8 +254,10 @@ function addLog(content) {
 
 // Function to add a log with typing effect
 function addLogWithTyping(message, callback) {
-    if (!message) {
-        console.error("addLogWithTyping: message가 비어 있습니다.");
+    if (!message || message.trim() === '') {
+        console.warn("addLogWithTyping: message가 비어 있습니다. nextLine()을 호출합니다.");
+        isWaitingForEnter = true; // 엔터 대기 상태로 설정
+        nextLine(); // 다음 줄로 이동
         return;
     }
 
