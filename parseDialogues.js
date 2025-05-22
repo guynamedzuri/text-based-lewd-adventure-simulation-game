@@ -3,7 +3,22 @@ const path = require('path');
 
 // Action 프리셋 정의
 const actionPresets = {
-    chara: (dir) => `() => updateImage(characterImage, 'chara/${dir}')`
+    chara: (dir) => `() => updateImage(characterImage, 'chara/${dir}')`,
+    showTitle: () => `() => {
+        const logWindow = document.getElementById('logWindow');
+        if (logWindow) {
+            const img = document.createElement('img');
+            img.src = 'title.png'; // 메인 디렉토리의 title.png
+            img.alt = '타이틀 이미지';
+            img.style.width = '100%'; // 이미지 크기 조정
+            img.style.height = 'auto';
+            logWindow.appendChild(img);
+            logWindow.scrollTop = logWindow.scrollHeight; // 스크롤을 맨 아래로 이동
+        }
+        nextLine(); // 다음 줄로 이동
+        return;
+    }`,
+    clear: () => `() => {clearLogWindow(); nextLine(); return;}`,
 };
 
 // 텍스트 파일 파싱 함수
@@ -71,11 +86,18 @@ function parseDialogueFile(filePath) {
                     // 중괄호가 닫히면 하나의 customCommand 완성
                     if (openBraces === 0 && commandBuffer.length > 0) {
                         const commandText = commandBuffer.join(' ').trim();
-                        const [textPart, destinationPart] = commandText.split(',').map(part => part.trim());
 
-                        // text와 destination 파싱
-                        const text = textPart.replace(/^"|"$/g, ''); // 양쪽 따옴표 제거
-                        const destination = eval(`(${destinationPart})`); // destination을 객체로 변환
+                        // 정규식을 사용하여 text와 destination 분리
+                        const match = commandText.match(/^"(.+?)",\s*destination:\s*(.+)$/);
+                        if (!match) {
+                            console.error(`customCommand 파싱 중 오류 발생: ${commandText}`);
+                            commandBuffer = []; // 버퍼 초기화
+                            continue;
+                        }
+
+                        const text = match[1]; // 첫 번째 그룹: text
+                        const destinationString = match[2]; // 두 번째 그룹: destination
+                        const destination = parseDestination(destinationString); // destination을 파싱
 
                         customCommands.push({ text, destination });
                         commandBuffer = []; // 버퍼 초기화
@@ -119,6 +141,33 @@ function parseDialogueFile(filePath) {
     return `window.${dialogueName} = ${formatAsJavaScriptObject(dialogueArray)};`;
 }
 
+// destination을 파싱하는 함수
+function parseDestination(destinationString) {
+    try {
+        // 문자열 유효성 검사: 중괄호와 괄호가 올바르게 닫혔는지 확인
+        const openBraces = (destinationString.match(/{/g) || []).length;
+        const closeBraces = (destinationString.match(/}/g) || []).length;
+        const openParens = (destinationString.match(/\(/g) || []).length;
+        const closeParens = (destinationString.match(/\)/g) || []).length;
+
+        if (openBraces !== closeBraces || openParens !== closeParens) {
+            throw new SyntaxError(`destination 문자열이 올바르게 닫히지 않았습니다: ${destinationString}`);
+        }
+
+        // 함수인지 객체인지 확인
+        if (destinationString.trim().startsWith('() =>')) {
+            // 함수 표현식 처리
+            return new Function(`return (${destinationString.trim()})`)();
+        } else {
+            // 객체 표현식 처리
+            return new Function(`return (${destinationString.trim()})`)();
+        }
+    } catch (error) {
+        console.error(`destination 파싱 중 오류 발생: ${destinationString}`, error);
+        return null;
+    }
+}
+
 // 함수형 destination을 처리하는 함수
 function parseFunctionDestination(lines) {
     const functionBody = lines.join('\n'); // 함수 본문 생성
@@ -145,7 +194,10 @@ function formatAsJavaScriptObject(obj, indent = 4, level = 0) {
 
 // 모든 txt 파일 파싱 및 합치기
 function parseAllDialogues(inputFolder, outputFile) {
-    const files = fs.readdirSync(inputFolder).filter(file => file.endsWith('.txt'));
+    // dialogues 폴더 내의 모든 .txt 파일을 가져옴
+    const files = fs.readdirSync(inputFolder)
+        .filter(file => file.endsWith('.txt') && file !== 'guide.txt'); // guide.txt 제외
+
     const parsedDialogues = files.map(file => {
         const filePath = path.join(inputFolder, file);
         return parseDialogueFile(filePath);

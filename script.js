@@ -14,13 +14,17 @@ let currentParagraphIndex = 0; // 현재 단락 인덱스
 let currentLineIndex = 0; // 현재 줄 인덱스
 let isTyping = false; // 타이핑 애니메이션 진행 여부
 let isWaitingForEnter = false; // 엔터 입력 대기 상태
-let currentDialogue = tutorial;
+let currentDialogue = start;
 let currentMap = 1; // 현재 맵 ID
 
 // 명령어 매핑
 const commandMap = {
     1: { text: "말을 건다", destination: { dialogue: "tutorial", label: "talkToVillager" } },
     2: { text: "이동한다", destination: { dialogue: "tutorial", label: "firstLine" } },
+    100: { text: "세이브한다", destination: { dialogue: "start", label: "save" } },
+    101: { text: "로드한다", destination: { dialogue: "start", label: "load" } },
+    102: { text: "능력 개방", destination: { dialogue: "start", label: "skill" } },
+    103: { text: "상점", destination: { dialogue: "mainPhase", label: "init" } },
     999: { text: "그만둔다", action: () => console.log("게임 종료") }
 };
 
@@ -229,11 +233,23 @@ function prepareForNextCommand() {
 // === 4. 로그 출력 관련 함수 ===
 
 // Function to add a log
-function addLog(message) {
+function addLog(content) {
+    const logWindow = document.getElementById('logWindow');
+    if (!logWindow) return;
+
     const logEntry = document.createElement('div');
-    logEntry.textContent = message;
+
+    // content가 문자열이면 텍스트로 추가
+    if (typeof content === 'string') {
+        logEntry.textContent = content;
+    } 
+    // content가 HTML 요소면 그대로 추가
+    else if (content instanceof HTMLElement) {
+        logEntry.appendChild(content);
+    }
+
     logWindow.appendChild(logEntry);
-    logWindow.scrollTop = logWindow.scrollHeight; // Scroll to the bottom
+    logWindow.scrollTop = logWindow.scrollHeight; // 스크롤을 맨 아래로 이동
 }
 
 // Function to add a log with typing effect

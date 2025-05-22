@@ -1,0 +1,34 @@
+// 문법 가이드
+// 각 paragraph는 반드시 -a, -d, -f, -c 중 하나를 포함해야 합니다.
+// -a: allowedCommands를 정의합니다.
+// -d: destination을 정의합니다.
+// -f: 함수형 destination을 정의합니다.
+// -c: customCommands를 정의합니다.
+
+*example1
+이것은 allowedCommands 예제입니다.
+-a
+1 2 3
+
+*example2
+이것은 destination 예제입니다.
+-d
+dialogueName labelName
+
+*example3
+이것은 함수형 destination 예제입니다.
+-f
+if (player.stats.hp > 50) {
+    return { dialogue: "dialogueName", label: "labelName1" };
+} else {
+    return { dialogue: "dialogueName", label: "labelName2" };
+}
+
+*example4
+이것은 customCommands 예제입니다.
+-c
+"선택지1", destination: { dialogue: "dialogueName", label: "labelName1" }
+"선택지2", destination: () => {
+    console.log("선택지2를 선택했습니다.");
+    return { dialogue: "dialogueName", label: "labelName2" };
+}
