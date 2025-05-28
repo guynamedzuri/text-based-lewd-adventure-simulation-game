@@ -1,44 +1,43 @@
-window.mainPhase = [{
-    label: "init",
-    steps: [{
-        text: "아무거나",
-        action: null
-    }],
-    allowedCommands: [
-        1,
-        2
-    ]
-}];
+window.mainPhase = [
+    {
+        label: "init",
+        steps: [
+            {
+                text: "아무거나",
+                action: null
+            }
+        ],
+        allowedCommands: [
+            1,
+            2
+        ]
+    }
+];
 
-window.start = [{
+window.start = [
+    {
         label: "initialize",
-        steps: [{
-            text: "\n",
-            action: () => {
-                const logWindow = document.getElementById('logWindow');
-                if (logWindow) {
-                    const img = document.createElement('img');
-                    img.src = 'title.png'; // 메인 디렉토리의 title.png
-                    img.alt = '타이틀 이미지';
-                    img.style.width = '100%'; // 이미지 크기 조정
-                    img.style.height = 'auto';
-                    logWindow.appendChild(img);
-                    logWindow.scrollTop = logWindow.scrollHeight; // 스크롤을 맨 아래로 이동
-                    waitingSkip();
-                }
-                return;
-            }
-            
-        },
-        {
-            text: "\n",
-            action: () => {
-                waitingSkip();
-                return;
-            }
+        steps: [
+            {
+                text: "\n",
+                action: () => {
+        const logWindow = document.getElementById('logWindow');
+        if (logWindow) {
+            const img = document.createElement('img');
+            img.src = 'title.png'; // 메인 디렉토리의 title.png
+            img.alt = '타이틀 이미지';
+            img.style.width = '100%'; // 이미지 크기 조정
+            img.style.height = 'auto';
+            logWindow.appendChild(img);
+            logWindow.scrollTop = logWindow.scrollHeight; // 스크롤을 맨 아래로 이동
         }
-    ],
-        customCommands: [{
+        nextLine(); // 다음 줄로 이동
+        return;
+    }
+            }
+        ],
+        customCommands: [
+            {
                 text: "처음부터 시작한다",
                 destination: {
                     dialogue: "start",
@@ -56,11 +55,14 @@ window.start = [{
     },
     {
         label: "skipAsk",
-        steps: [{
-            text: "인트로를 보시겠습니까?",
-            action: null
-        }],
-        customCommands: [{
+        steps: [
+            {
+                text: "인트로를 보시겠습니까?",
+                action: null
+            }
+        ],
+        customCommands: [
+            {
                 text: "본다",
                 destination: {
                     dialogue: "start",
@@ -78,10 +80,12 @@ window.start = [{
     },
     {
         label: "notReady",
-        steps: [{
-            text: "죄송합니다. 현재 세이브로드 기능 구현중입니다.",
-            action: null
-        }],
+        steps: [
+            {
+                text: "죄송합니다. 현재 세이브로드 기능 구현중입니다.",
+                action: null
+            }
+        ],
         destination: {
             dialogue: "start",
             label: "initialize"
@@ -89,12 +93,10 @@ window.start = [{
     },
     {
         label: "intro",
-        steps: [{
+        steps: [
+            {
                 text: "",
-                action: () => {
-                    clearLogWindow();
-                    return;
-                }
+                action: () => {clearLogWindow(); nextLine(); return;}
             },
             {
                 text: "인트로입니다.",
@@ -128,13 +130,10 @@ window.start = [{
     },
     {
         label: "startPhase",
-        steps: [{
+        steps: [
+            {
                 text: "",
-                action: () => {
-                    clearLogWindow();
-                    nextLine();
-                    return;
-                }
+                action: () => {clearLogWindow(); nextLine(); return;}
             },
             {
                 text: "이곳은 시작페이즈.",
@@ -170,171 +169,6 @@ window.start = [{
             101,
             102,
             103
-        ]
-    }
-];
-
-window.tutorial = [{
-        label: "firstLine",
-        steps: [{
-                text: "당신은 마을에 도착했습니다.",
-                action: null
-            },
-            {
-                text: "마을은 조용하고 평화로워 보입니다.",
-                action: null
-            }
-        ],
-        allowedCommands: [
-            1,
-            2
-        ]
-    },
-    {
-        label: "talkToVillager",
-        steps: [{
-                text: "마을 주민에게 말을 걸었습니다.",
-                action: null
-            },
-            {
-                text: "주민은 당신을 반갑게 맞이합니다.",
-                action: () => updateImage(characterImage, 'chara/wolf_smile.png')
-            }
-        ],
-        destination: {
-            dialogue: "tutorial",
-            label: "firstLine"
-        }
-    },
-    {
-        label: "friendlyVillager",
-        steps: [{
-            text: "마을 주민이 당신에게 말을 겁니다.",
-            action: null
-        }],
-        destination: function anonymous() {
-            if (charaInfo[1].love > 10) {
-                charaInfo[1].love += 5;
-                return {
-                    dialogue: "tutorial",
-                    label: "talkToVillager"
-                };
-            } else if (charaInfo[1].love > 5) {
-                charaInfo[1].love += 2;
-                return {
-                    dialogue: "tutorial",
-                    label: "neutralResponse"
-                };
-            } else {
-                charaInfo[1].love++;
-                return {
-                    dialogue: "tutorial",
-                    label: "coldResponse"
-                };
-            }
-        }
-    },
-    {
-        label: "friendlyVillager",
-        steps: [{
-            text: "마을 주민이 당신에게 말을 겁니다.",
-            action: null
-        }],
-        customCommands: [{
-                text: "text1",
-                destination: () => {
-                    no = true;
-                    return {
-                        dialogue: "tutorial",
-                        label: "question1-no"
-                    };
-                }
-            },
-            {
-                text: "text2",
-                destination: {
-                    dialogue: "tutorial",
-                    label: "question1-yes"
-                }
-            }
-        ]
-    },
-    {
-        label: "complexScenario",
-        steps: [{
-            text: "이것은 복잡한 시나리오입니다.",
-            action: null
-        }],
-        customCommands: [{
-                text: "선택지1",
-                destination: {
-                    dialogue: "tutorial",
-                    label: "option1"
-                }
-            },
-            {
-                text: "선택지2",
-                destination: () => {
-                    console.log("선택지2를 선택했습니다.");
-                    return {
-                        dialogue: "tutorial",
-                        label: "option2"
-                    };
-                }
-            }
-        ]
-    },
-    {
-        label: "option1",
-        steps: [{
-            text: "당신은 첫 번째 선택지를 선택했습니다.",
-            action: null
-        }],
-        destination: {
-            dialogue: "tutorial",
-            label: "complexScenario"
-        }
-    },
-    {
-        label: "option2",
-        steps: [{
-            text: "당신은 두 번째 선택지를 선택했습니다.",
-            action: null
-        }],
-        destination: function anonymous() {
-            if (player.stats.strength > 10) {
-                return {
-                    dialogue: "tutorial",
-                    label: "strongPath"
-                };
-            } else {
-                return {
-                    dialogue: "tutorial",
-                    label: "weakPath"
-                };
-            }
-        }
-    },
-    {
-        label: "strongPath",
-        steps: [{
-            text: "당신은 강한 길을 선택했습니다.",
-            action: null
-        }],
-        allowedCommands: [
-            5,
-            6
-        ]
-    },
-    {
-        label: "weakPath",
-        steps: [{
-            text: "당신은 약한 길을 선택했습니다.",
-            action: null
-        }],
-        allowedCommands: [
-            7,
-            8
         ]
     }
 ];
