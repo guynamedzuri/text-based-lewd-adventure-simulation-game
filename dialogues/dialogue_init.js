@@ -13,7 +13,7 @@ window.mainPhase = [{
 window.start = [{
         label: "initialize",
         steps: [{
-            text: "",
+            text: "\n",
             action: () => {
                 const logWindow = document.getElementById('logWindow');
                 if (logWindow) {
@@ -24,10 +24,20 @@ window.start = [{
                     img.style.height = 'auto';
                     logWindow.appendChild(img);
                     logWindow.scrollTop = logWindow.scrollHeight; // 스크롤을 맨 아래로 이동
+                    waitingSkip();
                 }
                 return;
             }
-        }],
+            
+        },
+        {
+            text: "\n",
+            action: () => {
+                waitingSkip();
+                return;
+            }
+        }
+    ],
         customCommands: [{
                 text: "처음부터 시작한다",
                 destination: {

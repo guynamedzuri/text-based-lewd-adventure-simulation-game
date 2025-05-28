@@ -145,16 +145,21 @@ function displayLine() {
 
     const step = paragraph.steps[currentLineIndex];
 
-    // 텍스트 출력
-    addLogWithTyping(step.text, () => {
-        isWaitingForEnter = true; // 줄 출력 후 엔터 대기
-        addBlinkingArrow(); // 역삼각형 애니메이션 추가
-    });
-
-    // 액션 실행
+    // 액션 실행 (텍스트 출력 전에 실행)
     if (step.action) {
         step.action();
     }
+
+    // 텍스트 출력
+    addLogWithTyping(step.text, () => {
+        isWaitingForEnter = true; // 줄 출력 후 엔터 대기
+        if (skip) {
+            skip = false; // 플래그 초기화
+            nextLine(); // 바로 다음 줄로 이동
+            return;
+        }
+        addBlinkingArrow(); // 역삼각형 애니메이션 추가
+    });
 }
 
 // 다음 대화로 이동
@@ -197,6 +202,11 @@ function nextLine() {
         currentLineIndex++;
         displayLine();
     }
+}
+
+// 엔터 입력 대기 안하고 바로 다음 줄 출력
+function waitingSkip() {
+    skip = true;
 }
 
 // 명령 대기 상태 준비
@@ -256,8 +266,8 @@ function addLog(content) {
 function addLogWithTyping(message, callback) {
     if (!message || message.trim() === '') {
         console.warn("addLogWithTyping: message가 비어 있습니다. nextLine()을 호출합니다.");
-        isWaitingForEnter = true; // 엔터 대기 상태로 설정
-        nextLine(); // 다음 줄로 이동
+        isWaitingForEnter = true;
+        nextLine(); // 바로 다음 줄로 이동
         return;
     }
 
@@ -291,7 +301,12 @@ function addLogWithTyping(message, callback) {
         }
 
         if (index < message.length) {
-            logEntry.textContent += message[index];
+            // 줄넘김 문자를 처리
+            if (message[index] === '\n') {
+                logEntry.appendChild(document.createElement('br')); // 줄넘김 추가
+            } else {
+                logEntry.textContent += message[index];
+            }
             index++;
             setTimeout(typeNextChar, 50); // Adjust typing speed here (50ms per character)
         } else {

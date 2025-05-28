@@ -24,7 +24,13 @@ const actionPresets = {
 // 텍스트 파일 파싱 함수
 function parseDialogueFile(filePath) {
     const content = fs.readFileSync(filePath, 'utf-8');
-    const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    const lines = content.split('\n').map(line => {
+        // 줄넘김 문자만 있는 경우 예외 처리
+        if (line.trim() === '') {
+            return '\n'; // 줄넘김 문자 유지
+        }
+        return line.trim(); // 나머지 경우는 trim 적용
+    }).filter(line => line.length > 0);
 
     const dialogueName = path.basename(filePath, '.txt'); // 파일명에서 확장자 제거
     const dialogueArray = [];
