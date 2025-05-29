@@ -23,6 +23,7 @@ window.start = [
                 action: () => {
         const logWindow = document.getElementById('logWindow');
         if (logWindow) {
+            clearLogWindow(); // 로그 창 초기화
             const img = document.createElement('img');
             img.src = 'title.png'; // 메인 디렉토리의 title.png
             img.alt = '타이틀 이미지';
@@ -160,15 +161,53 @@ window.start = [
                 action: null
             },
             {
-                text: "그럼 이제 시작페이즈에서 할 수 있는 명령어들을 보여드리겠습니다.",
+                text: "원래는 더 다양한 명령어를 보여줘야하는 구간이지만 일단은 그냥 진행해주시기 바랍니다.",
                 action: null
             }
         ],
-        allowedCommands: [
-            100,
-            101,
-            102,
-            103
+        customCommands: [
+            {
+                text: "눈을 뜬다",
+                destination: () => { clearLogWindow(); return {dialogue:"mainPhase", label:"init"} }
+            }
         ]
+    },
+    {
+        label: "move",
+        steps: [
+            {
+                text: "어디로 이동하십니까?",
+                action: null
+            }
+        ],
+        customCommands: [
+            {
+                text: "목장",
+                destination: {
+                    dialogue: "start",
+                    label: "moveToMap"
+                }
+            },
+            {
+                text: "마을",
+                destination: {
+                    dialogue: "start",
+                    label: "moveToMap"
+                }
+            }
+        ]
+    },
+    {
+        label: "endParagraphForTest",
+        steps: [
+            {
+                text: "테스트용",
+                action: null
+            }
+        ],
+        destination: {
+            dialogue: "start",
+            label: "initialize"
+        }
     }
 ];

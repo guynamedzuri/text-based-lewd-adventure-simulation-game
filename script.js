@@ -16,11 +16,12 @@ let isTyping = false; // 타이핑 애니메이션 진행 여부
 let isWaitingForEnter = false; // 엔터 입력 대기 상태
 let currentDialogue = start;
 let currentMap = 1; // 현재 맵 ID
+let skip = false; // 엔터 대기 없이 바로 다음 줄로 넘어갈지 여부
 
 // 명령어 매핑
 const commandMap = {
     1: { text: "말을 건다", destination: { dialogue: "tutorial", label: "talkToVillager" } },
-    2: { text: "이동한다", destination: { dialogue: "tutorial", label: "firstLine" } },
+    2: { text: "이동한다", destination: { dialogue: "start", label: "move" } },
     100: { text: "세이브한다", destination: { dialogue: "start", label: "save" } },
     101: { text: "로드한다", destination: { dialogue: "start", label: "load" } },
     102: { text: "능력 개방", destination: { dialogue: "start", label: "skill" } },
@@ -49,7 +50,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     displayLine(); // 첫 줄 출력
 
-    testImageUpdate(); // 캐릭터와 배경 이미지 업데이트
+    charaBackgroundImageInit(); // 시작할 땐 캐릭터와 배경 이미지 제거
 });
 
 // 엔터 키 이벤트 처리
@@ -389,6 +390,18 @@ function clearLogWindow() {
 
 // 이미지 업데이트 함수
 function updateImage(imageElement, newSrc) {
+    if (!newSrc) {
+        // newSrc가 null 또는 빈 값인 경우 이미지를 제거
+        imageElement.style.opacity = 0;
+
+        setTimeout(() => {
+            imageElement.src = ''; // 이미지 소스를 빈 값으로 설정
+            imageElement.alt = ''; // 대체 텍스트도 제거
+        }, 500); // CSS transition 시간(0.5초)과 동일하게 설정
+
+        return; // 이후 로직 실행 방지
+    }
+
     imageElement.style.opacity = 0;
 
     setTimeout(() => {
@@ -399,8 +412,8 @@ function updateImage(imageElement, newSrc) {
     }, 500); // CSS transition 시간(0.5초)과 동일하게 설정
 }
 
-// 테스트: 캐릭터와 배경 이미지 업데이트
-function testImageUpdate() {
-    updateImage(characterImage, 'chara/wolf_normal.png'); // 캐릭터 이미지 업데이트
-    updateImage(backgroundImage, 'map/1.png'); // 배경 이미지 업데이트
+// 캐릭터, 배경 이미지 제거 함수
+function charaBackgroundImageInit() {
+    updateImage(characterImage,); // 캐릭터 이미지 제거
+    updateImage(backgroundImage,); // 배경 이미지 제거
 }

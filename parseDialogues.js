@@ -1,5 +1,7 @@
 const fs = require('fs');
 const path = require('path');
+const { maps } = require('./map'); // maps를 가져옴
+const { currentMap } = require('./currentMap'); // currentMap을 가져옴
 
 // Action 프리셋 정의
 const actionPresets = {
@@ -7,6 +9,7 @@ const actionPresets = {
     showTitle: () => `() => {
         const logWindow = document.getElementById('logWindow');
         if (logWindow) {
+            clearLogWindow(); // 로그 창 초기화
             const img = document.createElement('img');
             img.src = 'title.png'; // 메인 디렉토리의 title.png
             img.alt = '타이틀 이미지';
@@ -48,10 +51,35 @@ function parseDialogueFile(filePath) {
             if (currentObject) {
                 dialogueArray.push(currentObject); // 이전 객체 저장
             }
-            currentObject = {
-                label: line.slice(1).trim(),
-                steps: [],
-            };
+
+            const label = line.slice(1).trim();
+
+            // 특별 처리: *move 라벨
+            if (label === 'move') {
+                currentObject = {
+                    label: "move",
+                    steps: [
+                        {
+                            text: "어디로 이동하십니까?",
+                            action: null
+                        }
+                    ],
+                    customCommands: (() => {
+                        const connectedMaps = maps[currentMap].connectedMaps; // 현재 맵의 연결된 맵 리스트
+                        return connectedMaps.map(mapId => {
+                            return {
+                                text: maps[mapId].name, // 연결된 맵의 이름
+                                destination: { dialogue: "start", label: "moveToMap" } // 이동 처리
+                            };
+                        });
+                    })()
+                };
+            } else {
+                currentObject = {
+                    label: label,
+                    steps: [],
+                };
+            }
         } else if (line.startsWith('-')) {
             // steps 종료 및 allowedCommands, destination, 또는 customCommands 설정
             const type = line[1]; // 'a', 'd', 'f', 또는 'c'

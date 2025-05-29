@@ -43,6 +43,7 @@
     justify-content: space-between;
     background-color: #000; /* Black background */
     border: 2px solid #fff; /* White border */
+    max-width: 70%;
 }
 
 /* 로그창 */
@@ -54,6 +55,8 @@
     flex-direction: column; /* Logs stack from top to bottom */
     background-color: #000; /* Black background */
     color: #00ff00; /* Neon green font color */
+    max-width: 100%; /* 최대 너비를 부모 컨테이너 너비로 제한 */
+    word-break: break-word; /* 긴 단어를 줄넘김 처리 */
 }
 
 /* 입력창 */

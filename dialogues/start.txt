@@ -33,5 +33,11 @@ start startPhase
 원래는 더 다양한 명령어를 보여줘야하는 구간이지만 일단은 그냥 진행해주시기 바랍니다.
 -c
 "눈을 뜬다", destination: () => {
-    
+    clearLogWindow();
+    return {dialogue:"mainPhase", label:"init"}
 }
+*move
+*endParagraphForTest
+테스트용
+-d
+start initialize

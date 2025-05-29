@@ -19,3 +19,5 @@ const maps = {
         commands : []
     }
 }
+
+module.exports = { maps };
